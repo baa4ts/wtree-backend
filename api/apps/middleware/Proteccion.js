@@ -11,7 +11,36 @@ import jwt from 'jsonwebtoken';
  *       description: >
  *         Middleware `Auth` que valida el token JWT enviado
  *         en el header `Authorization: Bearer <token>`.
- *         Retorna 401 si no hay token y 403 si el token es inválido.
+ *         Retorna:
+ *           - 401 Unauthorized si no hay token
+ *           - 403 Forbidden si el token es inválido
+ *   responses:
+ *     UnauthorizedError:
+ *       description: Token requerido
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 example: Token requerido
+ *               token:
+ *                 type: "null"
+ *                 example: null
+ *     ForbiddenError:
+ *       description: Token inválido
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 example: Token inválido
+ *               token:
+ *                 type: "null"
+ *                 example: null
  */
 export const Auth = (req, res, next) => {
   const authHeader = req.headers['authorization'];

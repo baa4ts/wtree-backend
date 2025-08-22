@@ -3,6 +3,7 @@ import { Auth } from '../middleware/Proteccion.js';
 
 import pkg from '@prisma/client';
 import { serializeJsonQuery } from '@prisma/client/runtime/library';
+import { faker } from '@faker-js/faker';
 const { PrismaClient } = pkg;
 
 const prisma = new PrismaClient();
@@ -12,12 +13,13 @@ const r = Router();
  * @swagger
  * /sensor:
  *   get:
- *     summary: Obtener sensores del usuario autenticado
- *     description: Devuelve la lista de sensores asociados al usuario que ha iniciado sesión. Requiere token JWT.
+ *     summary: Obtener todos los sensores del usuario
+ *     description: Obtiene todos los sensores asociados al usuario autenticado mediante token JWT. 
+ *                  Devuelve un arreglo con los nombres y IDs de cada sensor.
  *     tags:
- *       - sensor
+ *       - Sensor
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Sensores obtenidos exitosamente
@@ -29,45 +31,25 @@ const r = Router();
  *                 message:
  *                   type: string
  *                   example: Sensores obtenidos exitosamente
+ *                 token:
+ *                   type: string
+ *                   nullable: true
  *                 sensores:
  *                   type: array
+ *                   description: Lista de sensores del usuario
  *                   items:
  *                     type: object
  *                     properties:
  *                       sensorID:
- *                         type: integer
- *                         example: 101
+ *                         type: string
+ *                         example: SENSOR1234
+ *                         description: Identificador único del sensor
  *                       sensorUsername:
  *                         type: string
- *                         example: sensor_1
- *                 token:
- *                   type: null
- *       401:
- *         description: Token requerido
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Token requerido
- *                 token:
- *                   type: null
- *       403:
- *         description: Token inválido
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Token inválido
- *                 token:
- *                   type: null
+ *                         example: Sensor Sala
+ *                         description: Nombre del sensor
  *       500:
- *         description: Error del servidor
+ *         description: Error interno del servidor
  *         content:
  *           application/json:
  *             schema:
@@ -77,9 +59,9 @@ const r = Router();
  *                   type: string
  *                   example: Error del servidor
  *                 token:
- *                   type: null
+ *                   type: string
+ *                   nullable: true
  */
-
 r.get('/', Auth, async (req, res) => {
   try {
     const sensores = await prisma.sensor.findMany({
@@ -105,19 +87,21 @@ r.get('/', Auth, async (req, res) => {
  * @swagger
  * /sensor/{id}:
  *   get:
- *     summary: Obtener un sensor por ID
- *     description: Devuelve la información de un sensor específico y sus reportes. Solo el usuario autenticado puede acceder a sus propios sensores. Requiere token JWT.
+ *     summary: Obtener un sensor y sus reportes
+ *     description: Obtiene un sensor específico del usuario autenticado mediante su `id`. 
+ *                  Devuelve los datos del sensor y un arreglo con sus reportes si existe.
  *     tags:
- *       - sensor
+ *       - Sensor
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del sensor
+ *           example: 1
+ *         description: ID del sensor que se desea obtener
  *     responses:
  *       200:
  *         description: Sensor obtenido exitosamente
@@ -129,53 +113,84 @@ r.get('/', Auth, async (req, res) => {
  *                 message:
  *                   type: string
  *                   example: Sensor obtenido exitosamente
+ *                 token:
+ *                   type: string
+ *                   nullable: true
  *                 resultado:
  *                   type: object
+ *                   description: Datos del sensor y sus reportes
  *                   properties:
  *                     id:
  *                       type: integer
  *                       example: 1
+ *                     sensorID:
+ *                       type: string
+ *                       example: SENSOR1234
  *                     sensorUsername:
  *                       type: string
- *                       example: sensor_1
+ *                       example: Sensor Sala
  *                     sensorDescripction:
  *                       type: string
- *                       example: Sensor de temperatura ambiente
- *                     sensorID:
- *                       type: integer
- *                       example: 101
+ *                       example: Sensor de temperatura en sala principal
  *                     reportes:
  *                       type: array
+ *                       description: Lista de reportes asociados al sensor
  *                       items:
  *                         type: object
  *                         properties:
  *                           id:
  *                             type: integer
- *                             example: 55
- *                           sensorID:
- *                             type: integer
  *                             example: 101
+ *                           sensorID:
+ *                             type: string
+ *                             example: SENSOR1234
  *                           valor:
  *                             type: number
- *                             example: 25.7
+ *                             example: 23.5
  *                           fecha:
  *                             type: string
  *                             format: date-time
- *                             example: 2025-08-22T10:15:00Z
- *                 token:
- *                   type: null
+ *                             example: "2025-08-22T14:30:00Z"
  *       400:
- *         description: ID no proporcionado
- *       401:
- *         description: Token requerido
- *       403:
- *         description: Token inválido
+ *         description: Falta proporcionar el ID del sensor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Debe proporcionar un id
+ *                 token:
+ *                   type: string
+ *                   nullable: true
  *       404:
- *         description: Sensor no encontrado o no pertenece al usuario
+ *         description: Sensor no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: El sensor no se pudo obtener
+ *                 token:
+ *                   type: string
+ *                   nullable: true
  *       500:
- *         description: Error del servidor
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error del servidor
+ *                 token:
+ *                   type: string
+ *                   nullable: true
  */
-
 r.get('/:id', Auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -218,18 +233,131 @@ r.get('/:id', Auth, async (req, res) => {
   }
 });
 
-// r.post('/', Auth, async (req, res) => {
-//     try {
-//         const { sensorID, sensorUsername, sensorDescripction } = req.body;
+/**
+ * @swagger
+ * /sensor:
+ *   post:
+ *     summary: Registrar un nuevo sensor
+ *     description: Registra un sensor asociado al usuario autenticado. 
+ *                  Debe enviar `sensorID`, `sensorUsername` y `sensorDescripction`.
+ *                  Devuelve los datos del sensor registrado y un token (si aplica).
+ *     tags:
+ *       - Sensor
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - sensorID
+ *               - sensorUsername
+ *               - sensorDescripction
+ *             properties:
+ *               sensorID:
+ *                 type: string
+ *                 example: SENSOR1234
+ *                 description: Identificador único del sensor
+ *               sensorUsername:
+ *                 type: string
+ *                 example: Sensor Sala
+ *                 description: Nombre del sensor
+ *               sensorDescripction:
+ *                 type: string
+ *                 example: Sensor de temperatura en sala principal
+ *                 description: Breve descripción del sensor
+ *     responses:
+ *       200:
+ *         description: Sensor registrado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Sensor registrado exitosamente
+ *                 token:
+ *                   type: string
+ *                   nullable: true
+ *                 sensor:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     sensorID:
+ *                       type: string
+ *                       example: SENSOR1234
+ *                     sensorUsername:
+ *                       type: string
+ *                       example: Sensor Sala
+ *                     sensorDescripction:
+ *                       type: string
+ *                       example: Sensor de temperatura en sala principal
+ *                     usuarioId:
+ *                       type: integer
+ *                       example: 42
+ *       400:
+ *         description: Datos inválidos o sensor ya registrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: El sensor ya está registrado por otro usuario
+ *                 token:
+ *                   type: string
+ *                   nullable: true
+ *       500:
+ *         description: Error del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error del servidor
+ *                 token:
+ *                   type: string
+ *                   nullable: true
+ */
+r.post('/', Auth, async (req, res) => {
+  try {
+    const { sensorID, sensorUsername, sensorDescripction } = req.body;
 
-//         if (!sensorIDm || !sensorUsername || !sensorDescripction) {
-//             return res.status(400).json({ message: 'Debe proporcionar un id', token: null });
+    if (!sensorID || !sensorUsername || !sensorDescripction) {
+      return res.status(400).json({ message: 'Debe proporcionar sensorID, sensorUsername y sensorDescripction', token: null });
+    }
 
-//         }
+    // Verificar si el sensor ya existe
+    const check = await prisma.sensor.findFirst({ where: { sensorID } });
 
-//     } catch (error) {
+    if (check) {
+      return res.status(400).json({ message: 'El sensor ya está registrado por otro usuario', token: null });
+    }
 
-//     }
-// });
+    // Crear el sensor asociado al usuario autenticado
+    const sensor = await prisma.sensor.create({
+      data: {
+        sensorID,
+        sensorUsername,
+        sensorDescripction,
+        usuarioId: req.user.id,
+      },
+    });
+
+    return res.status(200).json({ message: 'Sensor registrado exitosamente', token: null, sensor });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error del servidor', token: null });
+  }
+});
+
 
 export { r as sensorRouter };
