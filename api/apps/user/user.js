@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
 import bcrypt from 'bcrypt';
 import { Auth } from '../middleware/Proteccion.js';
 import jwt from 'jsonwebtoken';
+
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 
 const prisma = new PrismaClient();
 const r = Router();
