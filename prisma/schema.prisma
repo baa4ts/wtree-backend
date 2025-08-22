@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  username  String
+  gmail     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  sensores  Sensor[]
+}
+
+model Sensor {
+  id                 Int      @id @default(autoincrement())
+  sensorID           String   @unique
+  usuarioId          Int
+  sensorUsername     String
+  sensorDescripction String
+  usuario            Usuario  @relation(fields: [usuarioId], references: [id])
+}
+
+model Reporte {
+  id       Int      @id @default(autoincrement())
+  sensorID String
+  valor    Float
+  fecha    DateTime @default(now())
+}
