@@ -7,8 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./api/index.js",
-    "format": "pnpm prettier --write 'api/**/*.{js,ts}'",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "format": "pnpm prettier --write 'api/**/*.{js,ts}'"
   },
   "keywords": [],
   "author": "",

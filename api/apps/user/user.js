@@ -11,7 +11,7 @@ const r = Router();
 
 /**
  * @swagger
- * /user/:
+ * /user:
  *   post:
  *     summary: Registro de usuario
  *     description: Crea un nuevo usuario con `username`, `gmail` y `password`. Devuelve un token JWT válido por 24 horas.
@@ -89,7 +89,7 @@ r.post('/', async (req, res) => {
 
 /**
  * @swagger
- * /user/:
+ * /user:
  *   put:
  *     summary: Login de usuario
  *     description: Autentica un usuario usando `username` y `password`. Devuelve un token JWT válido por 24 horas si las credenciales son correctas.
@@ -198,7 +198,7 @@ r.put('/', async (req, res) => {
 
 /**
  * @swagger
- * /user/:
+ * /user:
  *   get:
  *     summary: Obtener datos del usuario autenticado
  *     description: Devuelve los datos del usuario que ha iniciado sesión. Requiere token JWT en el header Authorization.
