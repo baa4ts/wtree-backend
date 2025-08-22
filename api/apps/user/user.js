@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import bcrypt from 'bcrypt';
 import { Auth } from '../middleware/Proteccion.js';
 import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 const r = Router();
-
 
 /**
  * @swagger
@@ -47,45 +47,44 @@ const r = Router();
  *         description: Error del servidor
  */
 r.post('/', async (req, res) => {
-    try {
-        const { username, gmail, password } = req.body;
+  try {
+    const { username, gmail, password } = req.body;
 
-        if (!username || !gmail || !password) {
-            return res.status(400).json({ message: 'Faltan credenciales', token: null });
-        }
-
-        const existingUser = await prisma.usuario.findFirst({
-            where: {
-                OR: [{ username }, { gmail }],
-            },
-        });
-
-        if (existingUser) {
-            return res.status(409).json({ message: 'El usuario ya existe', token: null });
-        }
-
-        // Hashear contraseña
-        const hashedPassword = bcrypt.hashSync(password, 5);
-
-        const user = await prisma.usuario.create({
-            data: { username, gmail, password: hashedPassword },
-        });
-
-        if (!user) {
-            return res.status(500).json({ message: 'Error del servidor', token: null });
-        }
-
-        // Crear token
-        const payload = { id: user.id, username: user.username, gmail: user.gmail };
-        const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '24h' });
-
-        return res.status(200).json({ message: 'Registro exitoso', token });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Error del servidor', token: null });
+    if (!username || !gmail || !password) {
+      return res.status(400).json({ message: 'Faltan credenciales', token: null });
     }
-});
 
+    const existingUser = await prisma.usuario.findFirst({
+      where: {
+        OR: [{ username }, { gmail }],
+      },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ message: 'El usuario ya existe', token: null });
+    }
+
+    // Hashear contraseña
+    const hashedPassword = bcrypt.hashSync(password, 5);
+
+    const user = await prisma.usuario.create({
+      data: { username, gmail, password: hashedPassword },
+    });
+
+    if (!user) {
+      return res.status(500).json({ message: 'Error del servidor', token: null });
+    }
+
+    // Crear token
+    const payload = { id: user.id, username: user.username, gmail: user.gmail };
+    const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '24h' });
+
+    return res.status(200).json({ message: 'Registro exitoso', token });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error del servidor', token: null });
+  }
+});
 
 /**
  * @swagger
@@ -165,37 +164,36 @@ r.post('/', async (req, res) => {
  *                   type: null
  */
 r.put('/', async (req, res) => {
-    try {
-        const { username, password } = req.body;
+  try {
+    const { username, password } = req.body;
 
-        if (!username || !password) {
-            return res.status(400).json({ message: 'Faltan credenciales', token: null });
-        }
-
-        const usuario = await prisma.usuario.findFirst({ where: { username } });
-
-        if (!usuario) {
-            return res.status(400).json({ message: 'Usuario no encontrado', token: null });
-        }
-
-        // Comparar contraseña
-        const passCheck = await bcrypt.compare(password, usuario.password);
-
-        if (!passCheck) {
-            return res.status(401).json({ message: 'Password incorrecta', token: null });
-        }
-
-        // Crear token
-        const payload = { id: usuario.id, username: usuario.username, gmail: usuario.gmail };
-        const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '24h' });
-
-        return res.status(200).json({ message: 'Login exitoso', token });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Error del servidor', token: null });
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Faltan credenciales', token: null });
     }
-});
 
+    const usuario = await prisma.usuario.findFirst({ where: { username } });
+
+    if (!usuario) {
+      return res.status(400).json({ message: 'Usuario no encontrado', token: null });
+    }
+
+    // Comparar contraseña
+    const passCheck = await bcrypt.compare(password, usuario.password);
+
+    if (!passCheck) {
+      return res.status(401).json({ message: 'Password incorrecta', token: null });
+    }
+
+    // Crear token
+    const payload = { id: usuario.id, username: usuario.username, gmail: usuario.gmail };
+    const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '24h' });
+
+    return res.status(200).json({ message: 'Login exitoso', token });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error del servidor', token: null });
+  }
+});
 
 /**
  * @swagger
@@ -285,27 +283,26 @@ r.put('/', async (req, res) => {
  *                 token:
  *                   type: null
  */
-r.get("/", Auth, async (req, res) => {
-    try {
-        const user = await prisma.usuario.findUnique({
-            where: { id: req.user.id },
-            select: { id: true, username: true, gmail: true, createdAt: true }
-        });
+r.get('/', Auth, async (req, res) => {
+  try {
+    const user = await prisma.usuario.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, username: true, gmail: true, createdAt: true },
+    });
 
-        if (!user) {
-            return res.status(400).json({ message: 'No se pudo obtener el usuario', token: null });
-        }
-
-        return res.status(200).json({
-            message: 'usuario obtenido exitosamente',
-            usuario: user,
-            token: null
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Error del servidor', token: null });
+    if (!user) {
+      return res.status(400).json({ message: 'No se pudo obtener el usuario', token: null });
     }
-});
 
+    return res.status(200).json({
+      message: 'usuario obtenido exitosamente',
+      usuario: user,
+      token: null,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error del servidor', token: null });
+  }
+});
 
 export { r as userRouter };
