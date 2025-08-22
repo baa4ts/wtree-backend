@@ -1,4 +1,4 @@
-import { ser } from "./config/config.js"
+import { userRouter } from './apps/user/user.js';
+import { ser } from './config/config.js';
 
-
-ser.get("/", (req, res) => { res.send("Hola") })
+ser.use('/user', userRouter)
