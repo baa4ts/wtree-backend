@@ -342,7 +342,6 @@ r.post('/', Auth, async (req, res) => {
       return res.status(400).json({ message: 'El sensor ya está registrado por otro usuario', token: null });
     }
 
-    // Crear el sensor asociado al usuario autenticado
     const sensor = await prisma.sensor.create({
       data: {
         sensorID,
