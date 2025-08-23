@@ -3,10 +3,9 @@ import { sensorRouter } from './apps/sensores/sensores.js';
 import { userRouter } from './apps/user/user.js';
 import { ser } from './config/config.js';
 
-app.use('/user', userRouter);
-app.use('/sensor', sensorRouter);
-app.use('/reports', reporterRouter);
+ser.use('/user', userRouter);
+ser.use('/sensor', sensorRouter);
+ser.use('/reports', reporterRouter);
 
 
-
-module.exports = app;
+export default ser;
