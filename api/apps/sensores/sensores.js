@@ -19,7 +19,7 @@ const r = Router();
  *     tags:
  *       - Sensor
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Sensores obtenidos exitosamente
@@ -93,7 +93,7 @@ r.get('/', Auth, async (req, res) => {
  *     tags:
  *       - Sensor
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -244,7 +244,7 @@ r.get('/:id', Auth, async (req, res) => {
  *     tags:
  *       - Sensor
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
