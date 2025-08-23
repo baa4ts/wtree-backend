@@ -13,8 +13,8 @@ const PORT = process.env.PORT || 3000;
 setupSwagger(ser);
 
 // Listener
-ser.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// ser.listen(PORT, () => {
+//   console.log(`Server running on http://localhost:${PORT}`);
+// });
 
 export { ser };
