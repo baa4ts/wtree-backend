@@ -3,18 +3,18 @@ import dotenv from 'dotenv';
 import setupSwagger from './swagger.js';
 
 dotenv.config();
-const ser = express();
+const app = express();
 
 // Configuración
-ser.use(express.json());
+app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 // Swagger
-setupSwagger(ser);
+setupSwagger(app);
 
 // Listener
-ser.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-export { ser };
+export { app };
