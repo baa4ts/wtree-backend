@@ -7,5 +7,4 @@ ser.use('/user', userRouter);
 ser.use('/sensor', sensorRouter);
 ser.use('/reports', reporterRouter);
 
-
 export default ser;

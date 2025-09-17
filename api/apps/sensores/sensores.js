@@ -14,7 +14,7 @@ const r = Router();
  * /sensor:
  *   get:
  *     summary: Obtener todos los sensores del usuario
- *     description: Obtiene todos los sensores asociados al usuario autenticado mediante token JWT. 
+ *     description: Obtiene todos los sensores asociados al usuario autenticado mediante token JWT.
  *                  Devuelve un arreglo con los nombres y IDs de cada sensor.
  *     tags:
  *       - Sensor
@@ -88,7 +88,7 @@ r.get('/', Auth, async (req, res) => {
  * /sensor/{id}:
  *   get:
  *     summary: Obtener un sensor y sus reportes
- *     description: Obtiene un sensor específico del usuario autenticado mediante su `id`. 
+ *     description: Obtiene un sensor específico del usuario autenticado mediante su `id`.
  *                  Devuelve los datos del sensor y un arreglo con sus reportes si existe.
  *     tags:
  *       - Sensor
@@ -193,7 +193,7 @@ r.get('/', Auth, async (req, res) => {
  */
 r.get('/:id', Auth, async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.user;
 
     if (!id) {
       return res.status(400).json({ message: 'Debe proporcionar un id', token: null });
@@ -238,7 +238,7 @@ r.get('/:id', Auth, async (req, res) => {
  * /sensor:
  *   post:
  *     summary: Registrar un nuevo sensor
- *     description: Registra un sensor asociado al usuario autenticado. 
+ *     description: Registra un sensor asociado al usuario autenticado.
  *                  Debe enviar `sensorID`, `sensorUsername` y `sensorDescripction`.
  *                  Devuelve los datos del sensor registrado y un token (si aplica).
  *     tags:
@@ -332,7 +332,9 @@ r.post('/', Auth, async (req, res) => {
     const { sensorID, sensorUsername, sensorDescripction } = req.body;
 
     if (!sensorID || !sensorUsername || !sensorDescripction) {
-      return res.status(400).json({ message: 'Debe proporcionar sensorID, sensorUsername y sensorDescripction', token: null });
+      return res
+        .status(400)
+        .json({ message: 'Debe proporcionar sensorID, sensorUsername y sensorDescripction', token: null });
     }
 
     // Verificar si el sensor ya existe
@@ -357,6 +359,5 @@ r.post('/', Auth, async (req, res) => {
     return res.status(500).json({ message: 'Error del servidor', token: null });
   }
 });
-
 
 export { r as sensorRouter };
