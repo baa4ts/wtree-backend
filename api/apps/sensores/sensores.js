@@ -99,8 +99,8 @@ r.get('/', Auth, async (req, res) => {
  *         in: path
  *         required: true
  *         schema:
- *           type: integer
- *           example: 1
+ *           type: string
+ *           example: HMCU9999
  *         description: ID del sensor que se desea obtener
  *     responses:
  *       200:
@@ -193,7 +193,8 @@ r.get('/', Auth, async (req, res) => {
  */
 r.get('/:id', Auth, async (req, res) => {
   try {
-    const { id } = req.user;
+    const { id } = req.params;
+    const userId = req.user.id;
 
     if (!id) {
       return res.status(400).json({ message: 'Debe proporcionar un id', token: null });
@@ -201,8 +202,8 @@ r.get('/:id', Auth, async (req, res) => {
 
     const sensor = await prisma.sensor.findFirst({
       where: {
-        id: parseInt(id, 10),
-        usuarioId: req.user.id, // seguridad extra
+        sensorID: id,
+        usuarioId: userId,
       },
     });
 
@@ -210,7 +211,7 @@ r.get('/:id', Auth, async (req, res) => {
       return res.status(404).json({ message: 'El sensor no se pudo obtener', token: null });
     }
 
-    const datos = await prisma.reporte.findMany({
+    const reportes = await prisma.reporte.findMany({
       where: { sensorID: sensor.sensorID },
     });
 
@@ -219,7 +220,7 @@ r.get('/:id', Auth, async (req, res) => {
       sensorUsername: sensor.sensorUsername,
       sensorDescripction: sensor.sensorDescripction,
       sensorID: sensor.sensorID,
-      reportes: datos || [],
+      reportes,
     };
 
     return res.status(200).json({
