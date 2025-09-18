@@ -122,10 +122,12 @@ r.get('/', Auth, async (req, res) => {
  *                   properties:
  *                     id:
  *                       type: integer
+ *                       description: ID interno del sensor en la base de datos
  *                       example: 1
  *                     sensorID:
  *                       type: string
- *                       example: SENSOR1234
+ *                       description: Identificador único del sensor
+ *                       example: HMCU9999
  *                     sensorUsername:
  *                       type: string
  *                       example: Sensor Sala
@@ -143,7 +145,7 @@ r.get('/', Auth, async (req, res) => {
  *                             example: 101
  *                           sensorID:
  *                             type: string
- *                             example: SENSOR1234
+ *                             example: HMCU9999
  *                           valor:
  *                             type: number
  *                             example: 23.5
