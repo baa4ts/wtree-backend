@@ -173,19 +173,20 @@ r.put('/', async (req, res) => {
     const { username, password, tokenExpo } = req.body;
 
     if (!username || !password || !tokenExpo) {
-      return res.status(400).json({ message: 'Faltan credenciales', token: null });
+      console.log(req.body)
+      return res.status(401).json({ message: 'Faltan credenciales', token: null });
     }
 
     const usuario = await prisma.usuario.findFirst({ where: { username } });
 
     if (!usuario) {
-      return res.status(400).json({ message: 'Usuario no encontrado', token: null });
+      return res.status(402).json({ message: 'Usuario no encontrado', token: null });
     }
 
     const passCheck = await bcrypt.compare(password, usuario.password);
 
     if (!passCheck) {
-      return res.status(401).json({ message: 'Password incorrecta', token: null });
+      return res.status(403).json({ message: 'Password incorrecta', token: null });
     }
 
     // Actualizar tokenExpo en la base de datos si cambió o es nuevo
