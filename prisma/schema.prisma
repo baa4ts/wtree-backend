@@ -14,6 +14,7 @@ model Usuario {
   gmail     String   @unique
   password  String
   createdAt DateTime @default(now())
+  expoToken  String?
 
   sensores  Sensor[]
 }

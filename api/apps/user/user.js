@@ -49,7 +49,7 @@ const r = Router();
  */
 r.post('/', async (req, res) => {
   try {
-    const { username, gmail, password } = req.body;
+    const { username, gmail, password, tokenExpo } = req.body;
 
     if (!username || !gmail || !password) {
       return res.status(400).json({ message: 'Faltan credenciales', token: null });
@@ -65,19 +65,18 @@ r.post('/', async (req, res) => {
       return res.status(409).json({ message: 'El usuario ya existe', token: null });
     }
 
-    // Hashear contraseña
     const hashedPassword = bcrypt.hashSync(password, 5);
 
     const user = await prisma.usuario.create({
-      data: { username, gmail, password: hashedPassword },
+      data: {
+        username,
+        gmail,
+        password: hashedPassword,
+        expoToken: tokenExpo ?? null,
+      },
     });
 
-    if (!user) {
-      return res.status(500).json({ message: 'Error del servidor', token: null });
-    }
-
-    // Crear token
-    const payload = { id: user.id, username: user.username, gmail: user.gmail };
+    const payload = { id: user.id, username: user.username, gmail: user.gmail, tokenExpo: tokenExpo ?? null };
     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '24h' });
 
     return res.status(200).json({ message: 'Registro exitoso', token });
@@ -92,7 +91,7 @@ r.post('/', async (req, res) => {
  * /user:
  *   put:
  *     summary: Login de usuario
- *     description: Autentica un usuario usando `username` y `password`. Devuelve un token JWT válido por 24 horas si las credenciales son correctas.
+ *     description: Autentica un usuario usando `username`, `password` y `tokenExpo`. Devuelve un token JWT válido por 24 horas si las credenciales son correctas. El JWT incluye `tokenExpo` para notificaciones push.
  *     tags:
  *       - Usuarios
  *     requestBody:
@@ -104,6 +103,7 @@ r.post('/', async (req, res) => {
  *             required:
  *               - username
  *               - password
+ *               - tokenExpo
  *             properties:
  *               username:
  *                 type: string
@@ -113,6 +113,10 @@ r.post('/', async (req, res) => {
  *                 type: string
  *                 example: contraseña123
  *                 description: Contraseña del usuario
+ *               tokenExpo:
+ *                 type: string
+ *                 example: ExpoPushToken[xxxxxxxxxxxxxxxxxxxxxx]
+ *                 description: Token de Expo Push Notification del dispositivo
  *     responses:
  *       200:
  *         description: Login exitoso
@@ -166,9 +170,9 @@ r.post('/', async (req, res) => {
  */
 r.put('/', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, tokenExpo } = req.body;
 
-    if (!username || !password) {
+    if (!username || !password || !tokenExpo) {
       return res.status(400).json({ message: 'Faltan credenciales', token: null });
     }
 
@@ -178,15 +182,21 @@ r.put('/', async (req, res) => {
       return res.status(400).json({ message: 'Usuario no encontrado', token: null });
     }
 
-    // Comparar contraseña
     const passCheck = await bcrypt.compare(password, usuario.password);
 
     if (!passCheck) {
       return res.status(401).json({ message: 'Password incorrecta', token: null });
     }
 
-    // Crear token
-    const payload = { id: usuario.id, username: usuario.username, gmail: usuario.gmail };
+    // Actualizar tokenExpo en la base de datos si cambió o es nuevo
+    if (usuario.expoToken !== tokenExpo) {
+      await prisma.usuario.update({
+        where: { id: usuario.id },
+        data: { expoToken },
+      });
+    }
+
+    const payload = { id: usuario.id, username: usuario.username, gmail: usuario.gmail, tokenExpo };
     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '24h' });
 
     return res.status(200).json({ message: 'Login exitoso', token });
