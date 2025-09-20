@@ -3,6 +3,7 @@ import { Router } from 'express';
 import pkg from '@prisma/client';
 import { Auth } from '../middleware/Proteccion.js';
 const { PrismaClient } = pkg;
+import { sendPushNotification } from '../../../expo/expo.js';
 
 const prisma = new PrismaClient();
 const r = Router();
@@ -14,7 +15,7 @@ const r = Router();
  *     summary: Registrar un nuevo reporte de un sensor
  *     description: Registra un nuevo reporte para un sensor específico.
  *                  Se debe enviar `sensorID` y `value`.
- *                  Si el valor supera cierto umbral, se puede generar una notificación (pendiente de implementar).
+ *                  Si el valor supera cierto umbral, se puede generar una notificación al usuario.
  *     tags:
  *       - Reportes
  *     requestBody:
@@ -70,28 +71,51 @@ const r = Router();
  *                   type: string
  *                   example: Detalle del error interno
  */
+
 r.post('/', async (req, res) => {
   const { sensorID, value } = req.body;
 
+  // Validación de datos
   if (!sensorID || value === undefined) {
     return res.status(400).json({ message: 'Se debe proporcionar el id y el valor' });
   }
 
-  if (value > 500) {
-    // Aquí va la lógica para enviar la notificación
-    // TODO: Implementarla
-  }
-
   try {
-    const check = await prisma.reporte.create({
-      data: { valor: value, sensorID: sensorID },
+    await prisma.reporte.create({
+      data: { valor: value, sensorID },
     });
+
+    if (value > 750) {
+      const sensorData = await prisma.sensor.findUnique({
+        where: { sensorID },
+        select: { usuarioId: true, sensorUsername: true },
+      });
+
+      if (sensorData) {
+        const usuario = await prisma.usuario.findUnique({
+          where: { id: sensorData.usuarioId },
+          select: { expoToken: true, username: true },
+        });
+
+        if (usuario && usuario.expoToken) {
+          const sent = sendPushNotification(
+            usuario.expoToken,
+            `¡¡¡ ${usuario.username} vuelvee !!!`,
+            `Tu planta te necesita. El sensor ${sensorData.sensorUsername} detectó que su tierra se está secando.`,
+            sensorID
+          );
+
+          if (sent) console.log('Notificación enviada');
+        }
+      }
+    }
 
     return res.status(200).json({ message: 'Reporte guardado exitosamente' });
   } catch (error) {
     return res.status(500).json({ message: 'Error al guardar el reporte', error: error.message });
   }
 });
+
 
 /**
  * @swagger
