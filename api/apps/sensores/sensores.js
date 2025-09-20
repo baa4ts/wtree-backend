@@ -214,7 +214,7 @@ r.get('/:id', Auth, async (req, res) => {
     }
 
     const reportes = await prisma.reporte.findMany({
-      where: { sensorID: sensor.sensorID },
+      where: { sensorID: sensor.sensorID }, orderBy: { fecha: "desc" }
     });
 
     const resultado = {
