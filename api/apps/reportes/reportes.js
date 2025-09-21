@@ -105,7 +105,7 @@ r.post('/', async (req, res) => {
             sensorID
           );
 
-          if (sent) console.log('Notificación enviada');
+          if (sent) console.log(`Notificación enviada: ${usuario} : ${usuario.expoToken}`);
         }
       }
     }
