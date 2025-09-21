@@ -71,7 +71,6 @@ const r = Router();
  *                   type: string
  *                   example: Detalle del error interno
  */
-
 r.post('/', async (req, res) => {
   const { sensorID, value } = req.body;
 
