@@ -2,9 +2,11 @@ import { reporterRouter } from './apps/reportes/reportes.js';
 import { sensorRouter } from './apps/sensores/sensores.js';
 import { userRouter } from './apps/user/user.js';
 import { ser } from './config/config.js';
+import {tokenRoute} from "./apps/token/token.js"
 
 ser.use('/user', userRouter);
 ser.use('/sensor', sensorRouter);
 ser.use('/reports', reporterRouter);
+ser.use('/token', tokenRoute);
 
 export default ser;
