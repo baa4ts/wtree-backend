@@ -84,30 +84,30 @@ r.post('/', async (req, res) => {
       data: { valor: value, sensorID },
     });
 
-    if (value > 750) {
-      const sensorData = await prisma.sensor.findUnique({
-        where: { sensorID },
-        select: { usuarioId: true, sensorUsername: true },
-      });
+    // if (value > 750) {
+    //   const sensorData = await prisma.sensor.findUnique({
+    //     where: { sensorID },
+    //     select: { usuarioId: true, sensorUsername: true },
+    //   });
 
-      if (sensorData) {
-        const usuario = await prisma.usuario.findUnique({
-          where: { id: sensorData.usuarioId },
-          select: { expoToken: true, username: true },
-        });
+    //   if (sensorData) {
+    //     const usuario = await prisma.usuario.findUnique({
+    //       where: { id: sensorData.usuarioId },
+    //       select: { expoToken: true, username: true },
+    //     });
 
-        if (usuario && usuario.expoToken) {
-          const sent = sendPushNotification(
-            usuario.expoToken,
-            `¡¡¡ ${usuario.username} vuelvee !!!`,
-            `Tu planta te necesita. El sensor ${sensorData.sensorUsername} detectó que su tierra se está secando.`,
-            sensorID
-          );
+    //     if (usuario && usuario.expoToken) {
+    //       const sent = sendPushNotification(
+    //         usuario.expoToken,
+    //         `¡¡¡ ${usuario.username} vuelvee !!!`,
+    //         `Tu planta te necesita. El sensor ${sensorData.sensorUsername} detectó que su tierra se está secando.`,
+    //         sensorID
+    //       );
 
-          if (sent) console.log(`Notificación enviada: ${usuario} : ${usuario.expoToken}`);
-        }
-      }
-    }
+    //       if (sent) console.log(`Notificación enviada: ${usuario} : ${usuario.expoToken}`);
+    //     }
+    //   }
+    // }
 
     return res.status(200).json({ message: 'Reporte guardado exitosamente' });
   } catch (error) {
